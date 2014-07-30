@@ -5,4 +5,4 @@ ADD . /usr/src/app
 WORKDIR /usr/src/app
 RUN pip install -r requirements.txt
 
-CMD ["python2 hipachectl.py"]
+ENTRYPOINT ["/usr/src/app/hipachectl.py"]
