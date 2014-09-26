@@ -10,20 +10,39 @@ from argparse import ArgumentParser
 
 
 from redis import StrictRedis
+from urlparse import urlparse
 
 
 def add_virtualhost(r, args):
-    ip = args.ip
-    port = "" if args.port in (80, 443) else ":{0:d}".format(args.port)
-    scheme = "https" if args.port == 443 else "http"
-    url = "{0:s}://{1:s}{2:s}".format(scheme, ip, port)
-
-    r.rpush("frontend:{0:s}".format(args.vhost), args.id)
-    r.rpush("frontend:{0:s}".format(args.vhost), url)
+    url = format_url(args.ip, args.port)
+    vhost = "frontend:{0:s}".format(args.vhost)
+    if vhost in r.keys():
+        members = r.lrange(vhost, 0, -1)
+        if args.id in members:
+            if url not in members:
+                r.linsert(vhost, 'after', args.id, url)
+        else:
+            r.rpush(vhost, args.id)
+            r.rpush(vhost, url)
+    else:
+        r.rpush(vhost, args.id)
+        r.rpush(vhost, url)
 
 
 def delete_virtualhost(r, args):
-    r.delete("frontend:{0:s}".format(args.vhost), args.id)
+    vhost = "frontend:{0:s}".format(args.vhost)
+    if not args.ip:
+        r.delete(vhost, args.id)
+    else:
+        url = format_url(args.ip, args.port)
+        r.lrem(vhost, 0, url)
+
+
+def format_url(ip, port):
+    port = "" if port in (80, 443) else ":{0:d}".format(port)
+    scheme = "https" if port == 443 else "http"
+    url = "{0:s}://{1:s}{2:s}".format(scheme, ip, port)
+    return url
 
 
 def list_virtualhosts(r, args):
@@ -38,7 +57,27 @@ def parse_args():
 
     parser.add_argument(
         "-H", dest="host", metavar="HOST", type=str,
-        help="hipache Host"
+        help="hipache Redis Host", default="127.0.0.1"
+    )
+
+    parser.add_argument(
+        "-P", dest="rport", metavar="RPORT", type=int,
+        help="hipache Redis Port", default=6379
+    )
+
+    parser.add_argument(
+        "-D", dest="database", metavar="DATABASE", type=int,
+        help="hipache Redis Database", default=0
+    )
+
+    parser.add_argument(
+        "-A", dest="password", metavar="PASSWORD", type=str,
+        help="hipache Redis Database Password", default=None
+    )
+
+    parser.add_argument(
+        "-U", dest="url", metavar="URL", type=str,
+        help="hipache Redis Connection URL (optional)", default=None
     )
 
     subparsers = parser.add_subparsers(
@@ -91,6 +130,16 @@ def parse_args():
         help="Application VirtualHost"
     )
 
+    delete_parser.add_argument(
+        "-i", "--ip", dest="ip", default=None, metavar="IP", type=str,
+        help="IP Address"
+    )
+
+    delete_parser.add_argument(
+        "-p", "--port", dest="port", default=80, metavar="PORT", type=int,
+        help="HTTP Listening Port"
+    )
+
     # list
     list_parser = subparsers.add_parser(
         "list",
@@ -104,8 +153,23 @@ def parse_args():
 def main():
     args = parse_args()
 
-    r = StrictRedis(args.host)
+    if args.url:
+        parsed = urlparse(args.url)
+        netloc = parsed.netloc
+        creds, host = netloc.split('@')
+        _, password = creds.split(':')
+        host, port = host.split(':')
+        args.host = host
+        if port:
+            args.rport = port
+        if password:
+            args.password = password
+        if parsed.path:
+            database = parsed.path.replace('/', '')
+            args.database = int(database)
 
+    r = StrictRedis(host=args.host, port=args.rport, db=args.database,
+                    password=args.password)
     args.func(r, args)
 
 

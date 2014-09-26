@@ -1,4 +1,4 @@
-FROM python:2
+FROM google/python:2.7 
 MAINTAINER James Mills <prologic@shortcircuitnet.au>
 
 ADD . /usr/src/app
