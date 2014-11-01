@@ -8,7 +8,6 @@ from hipachectl.version import version
 
 setup(
     name="hipachectl",
-
     version=version,
     description="Command Line Tool to Manage hipache",
     long_description=open("README.rst", "r").read(),
@@ -30,11 +29,6 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
-    ],
-    license="MIT",
-    keywords="event framework distributed concurrent component asynchronous",
-    platforms="POSIX",
-    packages=find_packages("."),
     ],
     license="MIT",
     keywords="hipache manage docker",
