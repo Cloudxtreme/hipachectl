@@ -1,11 +1,15 @@
 #!/usr/bin/env python
+# Module:   main
+# Date:     1st November 2014
+# Author:   James Mills, prologic at shortcircuit dot net dot au
 
 
-"""A command-line tool to manage hipache configurations"""
+"""Command Line Tool to Manage hipache"""
 
 
 from __future__ import print_function
 
+from os import environ
 from argparse import ArgumentParser
 
 
@@ -20,7 +24,7 @@ def add_virtualhost(r, args):
         members = r.lrange(vhost, 0, -1)
         if args.id in members:
             if url not in members:
-                r.linsert(vhost, 'after', args.id, url)
+                r.linsert(vhost, "after", args.id, url)
         else:
             r.rpush(vhost, args.id)
             r.rpush(vhost, url)
@@ -153,19 +157,26 @@ def parse_args():
 def main():
     args = parse_args()
 
+    if "REDIS_PORT" in environ:
+        parsed = urlparse(environ["REDIS_PORT"])
+        netloc = parsed.netloc
+        host, port = netloc.split(":")
+        args.host = host
+        args.rport = port
+
     if args.url:
         parsed = urlparse(args.url)
         netloc = parsed.netloc
-        creds, host = netloc.split('@')
-        _, password = creds.split(':')
-        host, port = host.split(':')
+        creds, host = netloc.split("@")
+        _, password = creds.split(":")
+        host, port = host.split(":")
         args.host = host
         if port:
             args.rport = port
         if password:
             args.password = password
         if parsed.path:
-            database = parsed.path.replace('/', '')
+            database = parsed.path.replace("/", "")
             args.database = int(database)
 
     r = StrictRedis(host=args.host, port=args.rport, db=args.database,

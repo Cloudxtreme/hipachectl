@@ -1,6 +1,6 @@
-.. docker:: http://docker.com/
-.. dotCloud:: http://dotcloud.com/
-.. hipache:: https://github.com/hipache/hipache
+.. _docker: http://docker.com/
+.. _dotCloud: http://dotcloud.com/
+.. _hipache: https://github.com/hipache/hipache
 
 
 hipachectl
@@ -31,12 +31,12 @@ Or install from the development repository::
 Usage
 -----
 
-To use hipachectl from `docker`_::
+To use hipachectl from `Docker`_::
     
     $ docker run prologic/hipachectl -H <hipache_ip> <command>
 
 Or::
     
-    $ ./hipachectl.py -H <docker_ip> <command>
+    $ hipachectl -H <docker_ip> <command>
 
 For help user the ``--help`` option.

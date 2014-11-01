@@ -1,8 +1,18 @@
-FROM google/python:2.7 
+# Docker Image for hipachectl
+
+FROM prologic/crux-python:latest
 MAINTAINER James Mills <prologic@shortcircuitnet.au>
 
-ADD . /usr/src/app
-WORKDIR /usr/src/app
-RUN pip install -r requirements.txt
+# Startup
+ENTRYPOINT ["/usr/bin/hipachectl"]
+CMD ["-h"]
 
-ENTRYPOINT ["/usr/src/app/hipachectl.py"]
+# Build/Runtime Dependencies
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt && \
+	rm /tmp/requirements.txt
+
+# Application
+WORKDIR /app
+ADD . /app
+RUN pip install .
