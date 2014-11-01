@@ -16,7 +16,7 @@ setup(
     url="https://bitbucket.org/prologic/hipachectl",
     download_url="http://bitbucket.org/prologic/hipachectl/downloads/",
     classifiers=[
-        "Development Status :: 1 - Alpha",
+        "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators",
