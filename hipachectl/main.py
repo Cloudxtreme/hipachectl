@@ -13,75 +13,29 @@ from os import environ
 from argparse import ArgumentParser
 
 
-from redis import StrictRedis
-from urlparse import urlparse
+from .api import Hipache
 
 
-def add_virtualhost(r, args):
-    url = format_url(args.ip, args.port)
-    vhost = "frontend:{0:s}".format(args.vhost)
-    if vhost in r.keys():
-        members = r.lrange(vhost, 0, -1)
-        if args.id in members:
-            if url not in members:
-                r.linsert(vhost, "after", args.id, url)
-        else:
-            r.rpush(vhost, args.id)
-            r.rpush(vhost, url)
-    else:
-        r.rpush(vhost, args.id)
-        r.rpush(vhost, url)
+def add_virtualhost(hipache, args):
+    hipache.add(args.id, args.host, args.ip, args.port)
 
 
-def delete_virtualhost(r, args):
-    vhost = "frontend:{0:s}".format(args.vhost)
-    if not args.ip:
-        r.delete(vhost, args.id)
-    else:
-        url = format_url(args.ip, args.port)
-        r.lrem(vhost, 0, url)
+def delete_virtualhost(hipache, args):
+    hipache.delete(args.id, args.host, args.ip, args.port)
 
 
-def format_url(ip, port):
-    port = "" if port in (80, 443) else ":{0:d}".format(port)
-    scheme = "https" if port == 443 else "http"
-    url = "{0:s}://{1:s}{2:s}".format(scheme, ip, port)
-    return url
-
-
-def list_virtualhosts(r, args):
-    for i, k in enumerate(r.keys()):
-        vhost = k.split(":")[1]
-        id, url = r.lrange(k, 0, -1)
-        print("{0:d}. {1:s} {2:s} {3:s}".format(i, vhost, id, url))
+def list_virtualhosts(hipache, args):
+    for i, data in enumerate(hipache):
+        print("{0:d}. {1:s} {2:s} {3:s}".format(i, data["host"], data["id"], data["url"]))
 
 
 def parse_args():
     parser = ArgumentParser(description=__doc__)
 
     parser.add_argument(
-        "-H", dest="host", metavar="HOST", type=str,
-        help="hipache Redis Host", default="127.0.0.1"
-    )
-
-    parser.add_argument(
-        "-P", dest="rport", metavar="RPORT", type=int,
-        help="hipache Redis Port", default=6379
-    )
-
-    parser.add_argument(
-        "-D", dest="database", metavar="DATABASE", type=int,
-        help="hipache Redis Database", default=0
-    )
-
-    parser.add_argument(
-        "-A", dest="password", metavar="PASSWORD", type=str,
-        help="hipache Redis Database Password", default=None
-    )
-
-    parser.add_argument(
-        "-U", dest="url", metavar="URL", type=str,
-        help="hipache Redis Connection URL (optional)", default=None
+        "-u", "--url", dest="url", metavar="URL", type=str,
+        default=environ.get("REDIS_PORT", environ.get("URL", "tcp://redis:6379")),
+        help="hipache Redis URL",
     )
 
     subparsers = parser.add_subparsers(
@@ -113,8 +67,8 @@ def parse_args():
     )
 
     add_parser.add_argument(
-        "vhost", metavar="VHOST", type=str,
-        help="Application VirtualHost"
+        "host", metavar="HOST", type=str,
+        help="Application Hostname"
     )
 
     # delete
@@ -130,8 +84,8 @@ def parse_args():
     )
 
     delete_parser.add_argument(
-        "vhost", metavar="VHOST", type=str,
-        help="Application VirtualHost"
+        "host", metavar="HOST", type=str,
+        help="Application Hostname"
     )
 
     delete_parser.add_argument(
@@ -157,31 +111,9 @@ def parse_args():
 def main():
     args = parse_args()
 
-    if "REDIS_PORT" in environ:
-        parsed = urlparse(environ["REDIS_PORT"])
-        netloc = parsed.netloc
-        host, port = netloc.split(":")
-        args.host = host
-        args.rport = port
+    hipache = Hipache(args.url)
 
-    if args.url:
-        parsed = urlparse(args.url)
-        netloc = parsed.netloc
-        creds, host = netloc.split("@")
-        _, password = creds.split(":")
-        host, port = host.split(":")
-        args.host = host
-        if port:
-            args.rport = port
-        if password:
-            args.password = password
-        if parsed.path:
-            database = parsed.path.replace("/", "")
-            args.database = int(database)
-
-    r = StrictRedis(host=args.host, port=args.rport, db=args.database,
-                    password=args.password)
-    args.func(r, args)
+    args.func(hipache, args)
 
 
 if __name__ == "__main__":
