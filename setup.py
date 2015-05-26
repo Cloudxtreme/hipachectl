@@ -10,11 +10,14 @@ setup(
     name="hipachectl",
     version=version,
     description="Command Line Tool to Manage hipache",
-    long_description=open("README.rst", "r").read(),
+    long_description="{}\n{}".format(
+        open("README.rst", "r").read(),
+        open("CHANGES.rst", "r").read(),
+    ),
     author="James Mills",
     author_email="James Mills, prologic at shortcircuit dot net dot au",
-    url="https://bitbucket.org/prologic/hipachectl",
-    download_url="http://bitbucket.org/prologic/hipachectl/downloads/",
+    url="https://github.org/prologic/hipachectl",
+    download_url="http://github.org/prologic/hipachectl/releases/",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

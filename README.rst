@@ -23,7 +23,7 @@ Either pull the prebuilt `Docker`_ image::
 
 Or install from the development repository::
     
-    $ hg clone https://bitbucket.org/prologic/hipachectl
+    $ git clone https://github.com/prologic/hipachectl.git
     $ cd hipachectl
     $ pip install -r requirements.txt
 
