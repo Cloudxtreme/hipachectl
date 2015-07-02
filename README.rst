@@ -13,6 +13,7 @@ load balancer and reverse proxy. hipachectl lets you:
 - add a new virtual host
 - delete a virtual host
 
+hipachectl is MIT licensed.
 
 Installation
 ------------

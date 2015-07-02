@@ -7,6 +7,8 @@ hipachectl is a command-line tool to manage [dotCloud](http://dotcloud.com/)'s [
 -   add a new virtual host
 -   delete a virtual host
 
+hipachectl is MIT licensed.
+
 Installation
 ------------
 
@@ -16,7 +18,7 @@ Either pull the prebuilt [Docker](http://docker.com/) image:
 
 Or install from the development repository:
 
-    $ hg clone https://bitbucket.org/prologic/hipachectl
+    $ git clone https://github.com/prologic/hipachectl.git
     $ cd hipachectl
     $ pip install -r requirements.txt
 
