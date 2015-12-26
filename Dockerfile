@@ -1,4 +1,4 @@
-FROM crux/python:onbuild
+FROM prologic/python-runtime:2.7-onbuild
 MAINTAINER James Mills <prologic@shortcircuitnet.au>
 
 # Startup
