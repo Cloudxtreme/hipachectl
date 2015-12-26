@@ -6,6 +6,10 @@
 hipachectl
 ==========
 
+.. image:: https://badge.imagelayers.io/prologic/hipachectl:latest.svg
+   :target: https://imagelayers.io/?images=prologic/hipachectl:latest
+   :alt: Image Layers
+
 hipachectl is a command-line tool to manage `dotCloud`_'s `hipache`_
 load balancer and reverse proxy. hipachectl lets you:
 
