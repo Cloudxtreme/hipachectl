@@ -34,7 +34,7 @@ def parse_args():
 
     parser.add_argument(
         "-u", "--url", dest="url", metavar="URL", type=str,
-        default=environ.get("REDIS_PORT", environ.get("URL", "tcp://redis:6379")),
+        default=environ.get("URL", "tcp://redis:6379"),
         help="hipache Redis URL",
     )
 
